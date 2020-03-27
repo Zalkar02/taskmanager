@@ -4,6 +4,13 @@ from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
 
 
+class UserSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+
 
 class UserCreateSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True, validators=[UniqueValidator(queryset=User.objects.all())])

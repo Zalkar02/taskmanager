@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view
 
 from .models import Task
 from .serializers import TaskSerializer
+from .permissions import IsOwner
 
 
 class TaskListView(generics.ListAPIView):
@@ -14,6 +15,10 @@ class TaskListView(generics.ListAPIView):
     serializer_class = TaskSerializer
     permission_classes = (permissions.IsAuthenticated,)
 
+    def get_queryset(self):
+        # self.request.user.tasks.all()
+        return Task.objects.filter(user=self.request.user)
+
 
 class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
@@ -21,7 +26,7 @@ class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, IsOwner,)
 
 
 class TaskCreateView(generics.CreateAPIView):
@@ -31,3 +36,7 @@ class TaskCreateView(generics.CreateAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
     permission_classes = (permissions.IsAuthenticated,)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+        

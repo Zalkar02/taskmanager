@@ -12,7 +12,7 @@ class TagListView(generics.ListAPIView):
     """
     queryset = Tag.objects.all().order_by('-id')
     serializer_class = TagSerializer
-
+    
 
 class TagDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
