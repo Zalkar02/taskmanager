@@ -1,7 +1,6 @@
 
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.contrib.auth import login, authenticate
 from rest_framework import status
 from rest_framework.test import APITestCase
 
@@ -48,3 +47,26 @@ class TaskTest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Task.objects.get(title='some title').title, 'some title')
+
+
+    def test_put_task(self):
+        """
+            Test to put task by id
+        """
+        task = Task.objects.first()
+        url = task.get_absolute_url()
+        self.client.login(username='testuser', password='testpassword')
+        data = {'title': 'Put title', "description": 'put test'}
+        response = self.client.put(url, data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['title'], 'Put title')
+
+    def test_delete_task(self):
+        """
+            Test to delete task by id
+        """
+        task = Task.objects.first()
+        url = task.get_absolute_url()
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
