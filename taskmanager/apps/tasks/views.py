@@ -1,42 +1,31 @@
-from rest_framework import generics
+from rest_framework import viewsets
 from rest_framework import permissions
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Task
 from .serializers import TaskSerializer
 from .permissions import IsOwner
 
 
-class TaskListView(generics.ListAPIView):
-    """
-        View that gets all tasks
-    """
-    queryset = Task.objects.all().order_by('-id')
+
+class TaskViewSet(viewsets.ModelViewSet):
     serializer_class = TaskSerializer
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.IsAuthenticated, IsOwner)
+    filter_backends = [DjangoFilterBackend,]
+    filterset_fields = ['status', 'tags']
 
     def get_queryset(self):
-        # self.request.user.tasks.all()
-        return Task.objects.filter(user=self.request.user)
+        return self.request.user.tasks.all()
 
-
-class TaskDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """
-        View that get task detail
-    """
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
-    permission_classes = (permissions.IsAuthenticated, IsOwner,)
-
-
-class TaskCreateView(generics.CreateAPIView):
-    """
-        View that creates a task
-    """
-    queryset = Task.objects.all()
-    serializer_class = TaskSerializer
-    permission_classes = (permissions.IsAuthenticated,)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-        
+
+
+    @action(detail=False, methods=['get'])
+    def get_done_tasks(self, request):
+        queryset = Task.objects.filter(status=True)
+        serializer = TaskSerializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)

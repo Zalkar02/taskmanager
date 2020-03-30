@@ -9,7 +9,7 @@ def api_root(request, format=None):
 
     response = Response({
         'tasks': reverse('task-list', request=request, format=format),
-        'task-create': reverse('task-create', request=request, format=format),
+        'done-tasks': reverse('done-tasks', request=request, format=format),
 
         'tags': reverse('tag-list', request=request, format=format),
         'tag-create': reverse('tag-create', request=request, format=format),
