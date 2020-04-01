@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from .models import Task
+from apps.tags.models import Tag
 
 
 class TaskTest(APITestCase):
@@ -13,15 +14,18 @@ class TaskTest(APITestCase):
         user.set_password('testpassword')
         user.save()
         Task.objects.create(title = 'Test Title', description='some descr', user=user, status=False)
+        Tag.objects.create(name='python')
 
     def test_get_task_list(self):
         """
             Test to get all tasks
         """
-        url = reverse('task-list')
+        url = reverse('task-list') # http://localhost:8000/api/tasks/
         self.client.login(username='testuser', password='testpassword')
         response = self.client.get(url)
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
 
     def test_get_task_detail(self):
         """
@@ -38,10 +42,12 @@ class TaskTest(APITestCase):
         """
             Test to create task
         """
-        url = reverse('task-create')  #http://localhost:8000/api/tasks/create
+        url = reverse('task-list')  #http://localhost:8000/api/tasks/
 
         self.client.login(username='testuser', password='testpassword')
-        data = {'title': 'some title', 'description': 'some test'}
+
+        tag = Tag.objects.first()  # http://localhost:8000/api/tags/2/
+        data = {'title': 'some title', 'description': 'some test', 'tags': [tag.get_absolute_url()] }
         
         response = self.client.post(url, data, format='json')
 
